@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Robot Navigation</title>
+    <meta name="description" content="Robot Navigation" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script>
+      AFRAME.registerComponent("cubic-curve", {
+        schema: {
+          startPoint: {
+            type: "vec2",
+            default: { x: 0, y: 0 },
+            parse: AFRAME.utils.coordinates.parse,
+          },
+          firstControlPoint: {
+            type: "vec2",
+            default: { x: 0, y: 0 },
+            parse: AFRAME.utils.coordinates.parse,
+          },
+          secondControlPoint: {
+            type: "vec2",
+            default: { x: 0, y: 0 },
+            parse: AFRAME.utils.coordinates.parse,
+          },
+          endPoint: { type: "vec2", default: { x: 0, y: 0 }, parse: AFRAME.utils.coordinates.parse },
+        },
+
+        /**
+         * Initial creation and setting of the mesh.
+         */
+        init: function () {
+          var data = this.data;
+          var el = this.el;
+          // console.log("Start Position:", data.startPoint);
+          // console.log("First Control Position:", data.firstControlPoint);
+          // console.log("Second Control Position:", data.secondControlPoint);
+          // console.log("End Position:", data.endPoint);
+
+          const curve = new THREE.CubicBezierCurve(
+            new THREE.Vector2(data.startPoint.x, data.startPoint.y),
+            new THREE.Vector2(data.firstControlPoint.x, data.firstControlPoint.y),
+            new THREE.Vector2(data.secondControlPoint.x, data.secondControlPoint.y),
+            new THREE.Vector2(data.endPoint.x, data.endPoint.y)
+          );
+
+          const points = curve.getPoints(50);
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+          const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+          // Create the final object to add to the scene
+          const curveObject = new THREE.Line(geometry, material);
+
+          // Set line on entity.
+          el.setObject3D("line", curveObject);
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-sky
+        src="https://cdn.glitch.global/b285dbd0-ec95-4bfc-ab16-ac4b7ba6762a/room.jpeg?v=1714044798128"
+        rotation="20 20 0"
+      ></a-sky>
+      <a-entity camera acceleration="1000" fly="false"> </a-entity>
+
+      <!-- The plane of the floor -->
+      <a-entity
+        id="The_floor"
+        geometry="primitive: plane; height: 1; width: 1"
+        position="0 -0.7 -1"
+        rotation="-90 0 90"
+        material="color: gray; opacity: 0.8"
+      >
+        <!-- Entities drawn onto the floor -->
+        <!--         <a-entity
+          id="nav-line1"
+          class="navLines"
+          line="start: 0 -0.1 0; end: 2 -0.1 0; color: blue"
+        ></a-entity>
+        <a-entity
+          id="nav-line2"
+          class="navLines"
+          line="start: 0 0.1 0; end: 2 0.1 0; color: blue"
+        ></a-entity> -->
+
+        <!-- SplineCurve -->
+        <a-entity cubic-curve="startPoint: 0 0; firstControlPoint: 1 0; secondControlPoint: 2 0; endPoint: 3 -2"></a-entity>
+        
+        <a-entity cubic-curve="startPoint: 0 0.2; firstControlPoint: 1 0.2; secondControlPoint: 2 0.2; endPoint: 5 -2"></a-entity>
+        <!-- Entities drawn onto the floor -->
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
